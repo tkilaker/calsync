@@ -171,8 +171,9 @@ for target in config.targets {
     let sourceCals = target.sources.map(resolve)
 
     // Busy intervals from sources, clamped to window.
-    let srcPredicate = store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: sourceCals)
-    let srcEvents = store.events(matching: srcPredicate)
+    // An empty calendar list means "all calendars" to EventKit; no sources must mean no events.
+    let srcEvents = sourceCals.isEmpty ? [] : store.events(matching:
+        store.predicateForEvents(withStart: windowStart, end: windowEnd, calendars: sourceCals))
     if ProcessInfo.processInfo.environment["CALSYNC_DEBUG"] != nil {
         for e in srcEvents {
             let skipped = !isBusy(e) || parseMarker(e.notes) != nil
